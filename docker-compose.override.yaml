@@ -1,0 +1,7 @@
+services:
+  robot:
+    platform: linux/amd64
+  gazeboserver:
+    platform: linux/amd64
+  foxglove:
+    platform: linux/amd64
