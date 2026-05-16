@@ -6,6 +6,7 @@ PlannerCore::PlannerCore(const rclcpp::Logger& logger)
 : logger_(logger),
   map_received_(false),
   goal_received_(false),
+  robot_pose_received_(false),
   goal_x_(0.0), goal_y_(0.0),
   robot_x_(0.0), robot_y_(0.0),
   occupied_threshold_(90)
@@ -25,12 +26,14 @@ void PlannerCore::setGoal(double goal_x, double goal_y) {
 void PlannerCore::setRobotPose(double x, double y) {
   robot_x_ = x;
   robot_y_ = y;
+  robot_pose_received_ = true;
 }
 
 bool PlannerCore::hasMap() const { return map_received_; }
 bool PlannerCore::hasGoal() const { return goal_received_; }
 
 bool PlannerCore::isGoalReached(double tolerance) const {
+  if (!robot_pose_received_ || !goal_received_) return false;
   double dx = robot_x_ - goal_x_;
   double dy = robot_y_ - goal_y_;
   return std::sqrt(dx * dx + dy * dy) < tolerance;

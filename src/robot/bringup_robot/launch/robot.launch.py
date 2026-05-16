@@ -93,4 +93,15 @@ def generate_launch_description():
     )
     ld.add_action(odometry_spoof_node)
 
+    #################### Static TF: map -> sim_world #####################
+    # The global map is built using sim_world odometry, so map and sim_world
+    # share the same origin. This lets Foxglove render /map and /path correctly.
+    map_to_world_tf = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='map_to_sim_world',
+        arguments=['0', '0', '0', '0', '0', '0', 'sim_world', 'map'],
+    )
+    ld.add_action(map_to_world_tf)
+
     return ld

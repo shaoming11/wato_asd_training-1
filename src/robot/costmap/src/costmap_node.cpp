@@ -1,4 +1,5 @@
 #include "costmap_node.hpp"
+#include "tf2/utils.h"
 
 CostmapNode::CostmapNode()
 : Node("costmap"), costmap_(robot::CostmapCore(this->get_logger()))
@@ -7,7 +8,18 @@ CostmapNode::CostmapNode()
     "/lidar", 10,
     std::bind(&CostmapNode::laserCallback, this, std::placeholders::_1));
 
+  odom_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
+    "/odom/filtered", 10,
+    std::bind(&CostmapNode::odomCallback, this, std::placeholders::_1));
+
   costmap_pub_ = this->create_publisher<nav_msgs::msg::OccupancyGrid>("/costmap", 10);
+}
+
+void CostmapNode::odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg) {
+  double x = msg->pose.pose.position.x;
+  double y = msg->pose.pose.position.y;
+  double theta = tf2::getYaw(msg->pose.pose.orientation);
+  costmap_.updateRobotPose(x, y, theta);
 }
 
 void CostmapNode::laserCallback(const sensor_msgs::msg::LaserScan::SharedPtr msg) {

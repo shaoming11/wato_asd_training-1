@@ -5,14 +5,21 @@ namespace robot {
 CostmapCore::CostmapCore(const rclcpp::Logger& logger)
 : logger_(logger),
   resolution_(0.1),
-  width_(200),
-  height_(200),
-  origin_x_(-10.0),
-  origin_y_(-10.0),
+  width_(500),
+  height_(500),
+  origin_x_(-25.0),
+  origin_y_(-25.0),
   obstacle_cost_(100),
-  inflation_radius_(1.0)
+  inflation_radius_(2.0),
+  robot_x_(0.0), robot_y_(0.0), robot_theta_(0.0)
 {
   data_.resize(width_ * height_, 0);
+}
+
+void CostmapCore::updateRobotPose(double x, double y, double theta) {
+  robot_x_ = x;
+  robot_y_ = y;
+  robot_theta_ = theta;
 }
 
 void CostmapCore::initializeCostmap() {
@@ -21,10 +28,12 @@ void CostmapCore::initializeCostmap() {
 }
 
 void CostmapCore::convertToGrid(double range, double angle, int& x_grid, int& y_grid) const {
-  double x = range * std::cos(angle);
-  double y = range * std::sin(angle);
-  x_grid = static_cast<int>((x - origin_x_) / resolution_);
-  y_grid = static_cast<int>((y - origin_y_) / resolution_);
+  double local_x = range * std::cos(angle);
+  double local_y = range * std::sin(angle);
+  double world_x = robot_x_ + local_x * std::cos(robot_theta_) - local_y * std::sin(robot_theta_);
+  double world_y = robot_y_ + local_x * std::sin(robot_theta_) + local_y * std::cos(robot_theta_);
+  x_grid = static_cast<int>((world_x - origin_x_) / resolution_);
+  y_grid = static_cast<int>((world_y - origin_y_) / resolution_);
 }
 
 bool CostmapCore::isValidCell(int x, int y) const {
@@ -60,7 +69,7 @@ void CostmapCore::inflateObstacles() {
 nav_msgs::msg::OccupancyGrid CostmapCore::getOccupancyGrid(const rclcpp::Time& stamp) const {
   nav_msgs::msg::OccupancyGrid grid;
   grid.header.stamp = stamp;
-  grid.header.frame_id = "base_link";
+  grid.header.frame_id = "sim_world";
   grid.info.resolution = static_cast<float>(resolution_);
   grid.info.width = static_cast<uint32_t>(width_);
   grid.info.height = static_cast<uint32_t>(height_);

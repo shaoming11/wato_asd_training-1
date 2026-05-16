@@ -60,6 +60,7 @@ class PlannerCore {
   nav_msgs::msg::OccupancyGrid map_;
   bool map_received_;
   bool goal_received_;
+  bool robot_pose_received_;
 
   double goal_x_, goal_y_;
   double robot_x_, robot_y_;

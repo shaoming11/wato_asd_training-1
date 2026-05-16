@@ -13,7 +13,7 @@ MapMemoryCore::MapMemoryCore(const rclcpp::Logger& logger)
   robot_x_(0.0), robot_y_(0.0), robot_theta_(0.0),
   last_update_x_(0.0), last_update_y_(0.0),
   distance_threshold_(1.5),
-  should_update_(false)
+  should_update_(true)
 {
   global_map_.header.frame_id = "map";
   global_map_.info.resolution = static_cast<float>(resolution_);
@@ -81,7 +81,10 @@ void MapMemoryCore::integrateCostmap() {
       int gy = static_cast<int>((global_y - origin_y_) / resolution_);
 
       if (gx < 0 || gx >= width_ || gy < 0 || gy >= height_) continue;
-      global_map_.data[gy * width_ + gx] = cell_val;
+      int8_t& map_cell = global_map_.data[gy * width_ + gx];
+      if (cell_val > map_cell) {
+        map_cell = cell_val;
+      }
     }
   }
 }

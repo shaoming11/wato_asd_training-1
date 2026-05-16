@@ -15,6 +15,7 @@ find_package(ament_cmake REQUIRED) # ROS2 build tool
 find_package(rclcpp REQUIRED)      # ROS2 C++ package
 find_package(sensor_msgs REQUIRED) # LaserScan message
 find_package(nav_msgs REQUIRED)    # OccupancyGrid message
+find_package(tf2 REQUIRED)         # getYaw utility
 
 # Compiles source files into a library
 # A library is not executed, instead other executables can link
@@ -31,6 +32,7 @@ ament_target_dependencies(costmap_lib
   rclcpp
   sensor_msgs
   nav_msgs
+  tf2
 )
  
 # Create ROS2 node executable from source files
